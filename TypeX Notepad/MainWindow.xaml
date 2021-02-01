@@ -5,8 +5,71 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TypeX_Notepad"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="TypeX Notepad" Height="450" Width="800">
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.New" CanExecute="New_CanExecute" 
+                        Executed="New_Executed"/>
+        <CommandBinding Command="ApplicationCommands.Open" CanExecute="Open_CanExecute"
+                        Executed="Open_Executed"/>
+    </Window.CommandBindings>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Margin="4">
+            <Menu Background="White" DockPanel.Dock="Top" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                <MenuItem x:Name="File" Header="File" Margin="0,0,10,0">
+                    <MenuItem x:Name="New" Header="New" Command="ApplicationCommands.New"/>
+                    <MenuItem x:Name="Open" Header="Open" Command="ApplicationCommands.Open"/>
+                    <MenuItem x:Name="Save" Header="Save" Command="ApplicationCommands.Save"/>
+                    <MenuItem x:Name="SaveAs" Header="Save As" Command="ApplicationCommands.SaveAs"/>
+                    <MenuItem x:Name="AutoSave" Header="AutoSave"
+                              IsCheckable="True"/>
+                    <MenuItem x:Name="EncodingOpt" Header="Show Encoding Options"
+                              IsCheckable="True"/>
+                    <MenuItem x:Name="PageSetup" Header="Page Setup"/>
+                    <MenuItem x:Name="PrintPreview" Header="Print Preview" Command="ApplicationCommands.PrintPreview"/>
+                    <MenuItem x:Name="Print" Header="Print" Command="ApplicationCommands.Print"/>
+                    <MenuItem x:Name="Exit" Header="Exit" Command="ApplicationCommands.Close"/>
+                </MenuItem>
+                <MenuItem x:Name="Edit" Header="Edit" Margin="0,0,10,0"/>
+                <MenuItem x:Name="Format" Header="Format" Margin="0,0,10,0"/>
+                <MenuItem x:Name="View" Header="View" Margin="0,0,10,0"/>
+                <MenuItem x:Name="Help" Header="Help" Margin="0,0,10,0"/>
+            </Menu>
+        </DockPanel>
+        <TextBox x:Name="TextBox" Grid.Row="1" Grid.Column="0" 
+                 Text="Drag and drop a file here or start typing" 
+                 FontSize="24"
+                 BorderThickness="0"
+                 AcceptsReturn="True" AcceptsTab="True" 
+                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                 TextWrapping="Wrap" SpellCheck.IsEnabled="True"
+                 HorizontalScrollBarVisibility="Auto"
+                 VerticalScrollBarVisibility="Visible"/>
+        <StatusBar Grid.Column="0" Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock x:Name="LineLabel" Text="Line:" FontSize="12" Margin="6,0,0,0"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="ColLabel" Text="Col:" FontSize="12" Margin="6,0,0,0"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="WordsLabel" Text="Words:" FontSize="12" Margin="6,0,0,0"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="ZoomLabel" Text="100%" FontSize="12" Margin="6,0,0,0"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock x:Name="AutoSaveLabel" Text="Saving the text as you are typing..." 
+                           Visibility="Hidden"
+                           FontSize="12" Margin="6,0,0,0"/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>
