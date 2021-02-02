@@ -37,8 +37,27 @@
                     <MenuItem x:Name="Print" Header="Print" Command="ApplicationCommands.Print"/>
                     <MenuItem x:Name="Exit" Header="Exit" Command="ApplicationCommands.Close"/>
                 </MenuItem>
-                <MenuItem x:Name="Edit" Header="Edit" Margin="0,0,10,0"/>
-                <MenuItem x:Name="Format" Header="Format" Margin="0,0,10,0"/>
+                <MenuItem x:Name="Edit" Header="Edit" Margin="0,0,10,0">
+                    <MenuItem x:Name="Undo" Header="Undo" Command="ApplicationCommands.Undo"/>
+                    <MenuItem x:Name="Redo" Header="Redo" Command="ApplicationCommands.Redo"/>
+                    <Separator/>
+                    <MenuItem x:Name="Cut" Header="Cut" Command="ApplicationCommands.Cut"/>
+                    <MenuItem x:Name="Copy" Header="Copy" Command="ApplicationCommands.Copy"/>
+                    <MenuItem x:Name="Paste" Header="Paste" Command="ApplicationCommands.Paste"/>
+                    <MenuItem x:Name="ClipBoard" Header="Show Clipboard"/>
+                    <MenuItem x:Name="Delete" Header="Delete" Command="ApplicationCommands.Delete"/>
+                    <Separator/>
+                    <MenuItem x:Name="Find" Header="Find" Command="ApplicationCommands.Find"/>
+                    <MenuItem x:Name="FindNext" Header="Find Next"/>
+                    <MenuItem x:Name="Replace" Header="Replace" Command="ApplicationCommands.Replace"/>
+                    <MenuItem x:Name="GoTo" Header="Go To..."/>
+                    <MenuItem x:Name="SelectAll" Header="Select All" Command="ApplicationCommands.SelectAll"/>
+                    <MenuItem x:Name="SearchWithGoogle" Header="Search With Google"/>
+                    <MenuItem x:Name="SearchWithBing" Header="Search With Bing"/>
+                    <Separator/>
+                    <MenuItem x:Name="TimeDate" Header="Time/Date"/>
+                </MenuItem>
+                <MenuItem x:Name="Customise" Header="Customise" Margin="0,0,10,0"/>
                 <MenuItem x:Name="View" Header="View" Margin="0,0,10,0"/>
                 <MenuItem x:Name="Help" Header="Help" Margin="0,0,10,0"/>
             </Menu>
