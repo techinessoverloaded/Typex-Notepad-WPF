@@ -5,8 +5,8 @@
     <Setting Name="DarkModeSet" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="WordWrapSet" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+    <Setting Name="WordWrapSet" Type="System.Windows.TextWrapping" Scope="User">
+      <Value Profile="(Default)">Wrap</Value>
     </Setting>
     <Setting Name="SpellCheckSet" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -20,8 +20,8 @@
     <Setting Name="FindTextContent" Type="System.String" Scope="Application">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="DefaultFont" Type="System.Drawing.Font" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="DefaultFont" Type="System.Windows.Media.FontFamily" Scope="User">
+      <Value Profile="(Default)">Arial,24pt</Value>
     </Setting>
     <Setting Name="IsCopyCut" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>

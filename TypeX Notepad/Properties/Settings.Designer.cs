@@ -37,10 +37,10 @@ namespace TypeX_Notepad.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool WordWrapSet {
+        [global::System.Configuration.DefaultSettingValueAttribute("Wrap")]
+        public global::System.Windows.TextWrapping WordWrapSet {
             get {
-                return ((bool)(this["WordWrapSet"]));
+                return ((global::System.Windows.TextWrapping)(this["WordWrapSet"]));
             }
             set {
                 this["WordWrapSet"] = value;
@@ -91,9 +91,10 @@ namespace TypeX_Notepad.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Drawing.Font DefaultFont {
+        [global::System.Configuration.DefaultSettingValueAttribute("Arial,24pt")]
+        public global::System.Windows.Media.FontFamily DefaultFont {
             get {
-                return ((global::System.Drawing.Font)(this["DefaultFont"]));
+                return ((global::System.Windows.Media.FontFamily)(this["DefaultFont"]));
             }
             set {
                 this["DefaultFont"] = value;
