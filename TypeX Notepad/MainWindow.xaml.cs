@@ -43,15 +43,6 @@ namespace TypeX_Notepad
         {
             
         }
-        public static class TypeXCommands
-        {
-            public static readonly RoutedUICommand AutoSave = new RoutedUICommand("AutoSave", "AutoSave", typeof(TypeXCommands),
-                new InputGestureCollection()
-                {
-                    new KeyGesture(Key.T,ModifierKeys.Control)
-                });
-        }
-
         private void Undo_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = TextBox.CanUndo;
@@ -94,12 +85,26 @@ namespace TypeX_Notepad
             SpellCheck.IsChecked = Settings.SpellCheckSet;
             WordWrap.IsChecked = TextWrappingToBool(Settings.WordWrapSet);
             StatusBar.IsChecked = Settings.StatusBarSet;
+            SetUpCustomCommands();
             openFileDialog = new OpenFileDialog();
             saveFileDialog = new SaveFileDialog();
             fontDialog = new FontDialog();
             fontDialog.ShowEffects = false;
             fontDialog.ShowColor = false;
             TextBox.FontFamily = Settings.DefaultFont;
+        }
+        private void SetUpCustomCommands()
+        {
+            RoutedUICommand AutoSaveCmd = new RoutedUICommand("Used for AutoSave", "AutoSaveCommand", typeof(MainMenu),
+               new InputGestureCollection()
+                {
+                    new KeyGesture(Key.T,ModifierKeys.Control)
+                });
+            CommandBinding commandBinding = new CommandBinding(AutoSaveCmd);
+            commandBinding.CanExecute += new CanExecuteRoutedEventHandler(AutoSave_CanExecute);
+            commandBinding.Executed += new ExecutedRoutedEventHandler(AutoSave_Executed);
+            CommandBindings.Add(commandBinding);
+            AutoSave.Command = AutoSaveCmd;
         }
         private void Font_Click(object sender, RoutedEventArgs e)
         {
@@ -127,6 +132,8 @@ namespace TypeX_Notepad
                 ColLabel.Text = "Col : " + (col + 1);
             if (WordsLabel != null)
                 WordsLabel.Text = "Words : " + words;
+            if (Settings.AutoSaveSet&&AutosaveLabel!=null)
+                AutosaveLabel.Visibility = Visibility.Visible;
         }
         private int GetWordCount()
         {
@@ -185,6 +192,21 @@ namespace TypeX_Notepad
         private void StatusBar_Unchecked(object sender, RoutedEventArgs e)
         {
             Settings.StatusBarSet = false;
+            Settings.Save();
+        }
+        private void AutoSave_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void AutoSave_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            Settings.AutoSaveSet = !Settings.AutoSaveSet;
+            Settings.Save();
+        }
+        private void AutoSave_Click(object sender,RoutedEventArgs e)
+        {
+            Settings.AutoSaveSet = !Settings.AutoSaveSet;
             Settings.Save();
         }
     }

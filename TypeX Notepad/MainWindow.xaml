@@ -33,14 +33,19 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <DockPanel Margin="4">
-            <Menu Background="White" DockPanel.Dock="Top" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <Menu HorizontalAlignment="Stretch" VerticalAlignment="Top" 
+                Background="White" DockPanel.Dock="Top" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
                 <MenuItem x:Name="File" Header="File" Margin="0,0,10,0">
                     <MenuItem x:Name="New" Header="New" Command="ApplicationCommands.New"/>
                     <MenuItem x:Name="Open" Header="Open" Command="ApplicationCommands.Open"/>
                     <MenuItem x:Name="Save" Header="Save" Command="ApplicationCommands.Save"/>
                     <MenuItem x:Name="SaveAs" Header="Save As" Command="ApplicationCommands.SaveAs"/>
                     <MenuItem x:Name="AutoSave" Header="AutoSave"
-                              IsCheckable="True"/>
+                              IsCheckable="True"
+                              InputGestureText="Ctrl+T"
+                              IsChecked="{Binding Default.AutoSaveSet,Mode=TwoWay}"
+                              Click="AutoSave_Click"
+                              />
                     <MenuItem x:Name="EncodingOpt" Header="Show Encoding Options"
                               IsCheckable="True"/>
                     <MenuItem x:Name="PageSetup" Header="Page Setup"/>
@@ -127,7 +132,7 @@
             <StatusBarItem Margin="6,0,0,0">
                 <TextBlock x:Name="AutosaveLabel" Text="Saving the text as you are typing..." 
                            FontSize="13"
-                           Visibility="{Binding Path=Default.AutoSaveSet,Converter={StaticResource BoolToVis}}"
+                           Visibility="Hidden"
                            />
             </StatusBarItem>
         </StatusBar>
