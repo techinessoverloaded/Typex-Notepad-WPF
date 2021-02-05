@@ -100,12 +100,54 @@ namespace TypeX_Notepad
                 {
                     new KeyGesture(Key.T,ModifierKeys.Control)
                 });
-            CommandBinding commandBinding = new CommandBinding(AutoSaveCmd);
-            commandBinding.CanExecute += new CanExecuteRoutedEventHandler(AutoSave_CanExecute);
-            commandBinding.Executed += new ExecutedRoutedEventHandler(AutoSave_Executed);
-            CommandBindings.Add(commandBinding);
+            RoutedUICommand SaveAsCmd = new RoutedUICommand("Used for SaveAs", "SaveAsCommand", typeof(MainMenu),
+               new InputGestureCollection()
+                {
+                    new KeyGesture(Key.S,ModifierKeys.Alt)
+                });
+            RoutedUICommand PageSetupCmd = new RoutedUICommand("Used for Page Setup", "PageSetupCommand", typeof(MainMenu),
+               new InputGestureCollection()
+                {
+                    new KeyGesture(Key.P,ModifierKeys.Alt)
+                });
+            RoutedUICommand ExitCmd = new RoutedUICommand("Used for Exit", "ExitCommand", typeof(MainMenu),
+               new InputGestureCollection()
+                {
+                    new KeyGesture(Key.Escape,ModifierKeys.Shift)
+                });
+            CommandBindings.Add(new CommandBinding(AutoSaveCmd,new ExecutedRoutedEventHandler(AutoSave_Executed),
+                new CanExecuteRoutedEventHandler(AutoSave_CanExecute)));
+            CommandBindings.Add(new CommandBinding(SaveAsCmd,new ExecutedRoutedEventHandler(SaveAs_Executed),
+                new CanExecuteRoutedEventHandler(SaveAs_CanExecute)));
+            CommandBindings.Add(new CommandBinding(PageSetupCmd, new ExecutedRoutedEventHandler(PageSetup_Executed),
+                new CanExecuteRoutedEventHandler(PageSetup_CanExecute)));
+            CommandBindings.Add(new CommandBinding(ExitCmd, new ExecutedRoutedEventHandler(Exit_Executed),
+                new CanExecuteRoutedEventHandler(Exit_CanExecute)));
             AutoSave.Command = AutoSaveCmd;
+            SaveAs.Command = SaveAsCmd;
+            PageSetup.Command = PageSetupCmd;
+            Exit.Command = ExitCmd;
         }
+
+        private void PageSetup_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void PageSetup_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            System.Windows.MessageBox.Show("Page Setup");
+        }
+
+        private void SaveAs_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            System.Windows.MessageBox.Show("Save As");
+        }
+        private void SaveAs_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
         private void Font_Click(object sender, RoutedEventArgs e)
         {
             fontDialog.Font = new Font(new System.Drawing.FontFamily(Settings.DefaultFont.Source), 23);
@@ -198,16 +240,18 @@ namespace TypeX_Notepad
         {
             e.CanExecute = true;
         }
-
-        private void AutoSave_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void ToggleAutoSave()
         {
             Settings.AutoSaveSet = !Settings.AutoSaveSet;
             Settings.Save();
         }
+        private void AutoSave_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ToggleAutoSave();
+        }
         private void AutoSave_Click(object sender,RoutedEventArgs e)
         {
-            Settings.AutoSaveSet = !Settings.AutoSaveSet;
-            Settings.Save();
+            ToggleAutoSave();
         }
     }
 }

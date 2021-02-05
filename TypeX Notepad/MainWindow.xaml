@@ -16,8 +16,6 @@
                         Executed="Undo_Executed"/>
         <CommandBinding Command="ApplicationCommands.Redo" CanExecute="Redo_CanExecute"
                         Executed="Redo_Executed"/>
-        <CommandBinding Command="ApplicationCommands.Close" CanExecute="Exit_CanExecute"
-                        Executed="Exit_Executed"/>
     </Window.CommandBindings>
     <Window.Resources>
         <prop:Settings x:Key="settings"/>
@@ -39,7 +37,8 @@
                     <MenuItem x:Name="New" Header="New" Command="ApplicationCommands.New"/>
                     <MenuItem x:Name="Open" Header="Open" Command="ApplicationCommands.Open"/>
                     <MenuItem x:Name="Save" Header="Save" Command="ApplicationCommands.Save"/>
-                    <MenuItem x:Name="SaveAs" Header="Save As" Command="ApplicationCommands.SaveAs"/>
+                    <MenuItem x:Name="SaveAs" Header="Save As" Command="ApplicationCommands.SaveAs"
+                              InputGestureText="Alt+S"/>
                     <MenuItem x:Name="AutoSave" Header="AutoSave"
                               IsCheckable="True"
                               InputGestureText="Ctrl+T"
@@ -48,10 +47,10 @@
                               />
                     <MenuItem x:Name="EncodingOpt" Header="Show Encoding Options"
                               IsCheckable="True"/>
-                    <MenuItem x:Name="PageSetup" Header="Page Setup"/>
+                    <MenuItem x:Name="PageSetup" Header="Page Setup" InputGestureText="Alt+P"/>
                     <MenuItem x:Name="PrintPreview" Header="Print Preview" Command="ApplicationCommands.PrintPreview"/>
                     <MenuItem x:Name="Print" Header="Print" Command="ApplicationCommands.Print"/>
-                    <MenuItem x:Name="Exit" Header="Exit" Command="ApplicationCommands.Close"/>
+                    <MenuItem x:Name="Exit" Header="Exit" InputGestureText="Shift+Esc"/>
                 </MenuItem>
                 <MenuItem x:Name="Edit" Header="Edit" Margin="0,0,10,0">
                     <MenuItem x:Name="Undo" Header="Undo" Command="ApplicationCommands.Undo"/>
