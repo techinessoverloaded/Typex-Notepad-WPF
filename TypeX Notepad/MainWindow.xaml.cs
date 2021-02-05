@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Text;
 using System;
 using System.Drawing;
+using System.IO;
 
 namespace TypeX_Notepad
 {
@@ -23,6 +24,10 @@ namespace TypeX_Notepad
         private OpenFileDialog openFileDialog;
         private SaveFileDialog saveFileDialog;
         private Encoding encoding;
+        private static readonly string DefaultText = "Drag and drop a file here or start typing";
+        private static readonly string DefaultTitle = "TypeX Notepad - Untitled"; 
+        private static readonly string AutoSaveMessage = "Saving the file as you are typing...";
+        private string FilePath = null;
         public MainWindow()
         {
             InitializeComponent();
@@ -71,7 +76,12 @@ namespace TypeX_Notepad
         {
             InstantiateControls();
             TextBox.TextChanged += new TextChangedEventHandler(TextBox_TextChanged);
+            TextBox.KeyUp += new System.Windows.Input.KeyEventHandler(TextBox_KeyUp);
             UpdateStatusBar();
+            SetTitle();
+            TextBox.Text = DefaultText;
+            TextBox.Focus();
+            TextBox.SelectAll();
             //flowDocument = new FlowDocument();
             //printDialog = new System.Windows.Controls.PrintDialog();
             //printPreviewDialog = new PrintPreviewDialog();
@@ -80,6 +90,16 @@ namespace TypeX_Notepad
             //flowDocument.Blocks.Add(new Paragraph(new Run(TextBox.Text)));
             //printDialog.PrintDocument((((IDocumentPaginatorSource)flowDocument).DocumentPaginator),"Using Paginator");
         }
+
+        private void TextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(AutosaveLabel!=null)
+            {
+                if (AutosaveLabel.Text.Equals(AutoSaveMessage))
+                    AutosaveLabel.Text = string.Empty;
+            }
+        }
+
         private void InstantiateControls()
         { 
             SpellCheck.IsChecked = Settings.SpellCheckSet;
@@ -138,16 +158,40 @@ namespace TypeX_Notepad
         {
             System.Windows.MessageBox.Show("Page Setup");
         }
-
+        private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            FilePath = "E:\\sample.txt";
+            SetTitle();
+        }
+        private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
         private void SaveAs_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            System.Windows.MessageBox.Show("Save As");
+            FilePath = null;
+            SetTitle();
         }
         private void SaveAs_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = true;
         }
-
+        private void PrintPreview_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            System.Windows.MessageBox.Show("Print Preview");
+        }
+        private void PrintPreview_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+        private void Print_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            System.Windows.MessageBox.Show("Print");
+        }
+        private void Print_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
         private void Font_Click(object sender, RoutedEventArgs e)
         {
             fontDialog.Font = new Font(new System.Drawing.FontFamily(Settings.DefaultFont.Source), 23);
@@ -174,8 +218,18 @@ namespace TypeX_Notepad
                 ColLabel.Text = "Col : " + (col + 1);
             if (WordsLabel != null)
                 WordsLabel.Text = "Words : " + words;
-            if (Settings.AutoSaveSet&&AutosaveLabel!=null)
-                AutosaveLabel.Visibility = Visibility.Visible;
+            if (AutosaveLabel != null)
+            {
+                if (Settings.AutoSaveSet&&FilePath!=null)
+                { 
+                    File.WriteAllText(FilePath, TextBox.Text);
+                    AutosaveLabel.Text = AutoSaveMessage;
+                }
+                else
+                {
+                    AutosaveLabel.Text = string.Empty;
+                }
+            }
         }
         private int GetWordCount()
         {
@@ -244,6 +298,7 @@ namespace TypeX_Notepad
         {
             Settings.AutoSaveSet = !Settings.AutoSaveSet;
             Settings.Save();
+            SetTitle();
         }
         private void AutoSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -252,6 +307,24 @@ namespace TypeX_Notepad
         private void AutoSave_Click(object sender,RoutedEventArgs e)
         {
             ToggleAutoSave();
+        }
+        private void SetTitle()
+        {
+            if(FilePath!=null)
+            {
+                if(Settings.AutoSaveSet)
+                {
+                    Title = DefaultTitle.Replace("Untitled", FilePath + " (AutoSave Enabled)");
+                }
+                else
+                {
+                    Title = DefaultTitle.Replace("Untitled", FilePath);
+                }
+            }
+            else
+            {
+                Title = DefaultTitle;
+            }
         }
     }
 }

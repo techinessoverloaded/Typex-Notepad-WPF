@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TypeX_Notepad"
         xmlns:prop="clr-namespace:TypeX_Notepad.Properties"
         mc:Ignorable="d"
-        Title="TypeX Notepad" Height="450" Width="800" Loaded="MainForm_Loaded">
+        Title="TypeX Notepad - Untitled" Height="450" Width="800" Loaded="MainForm_Loaded">
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.New" CanExecute="New_CanExecute" 
                         Executed="New_Executed"/>
@@ -16,6 +16,12 @@
                         Executed="Undo_Executed"/>
         <CommandBinding Command="ApplicationCommands.Redo" CanExecute="Redo_CanExecute"
                         Executed="Redo_Executed"/>
+        <CommandBinding Command="ApplicationCommands.PrintPreview" CanExecute="PrintPreview_CanExecute"
+                        Executed="PrintPreview_Executed"/>
+        <CommandBinding Command="ApplicationCommands.Print" CanExecute="Print_CanExecute"
+                        Executed="Print_Executed"/>
+        <CommandBinding Command="ApplicationCommands.Save" CanExecute="Save_CanExecute"
+                        Executed="Save_Executed"/>
     </Window.CommandBindings>
     <Window.Resources>
         <prop:Settings x:Key="settings"/>
@@ -28,12 +34,13 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="13*"/>
+            <ColumnDefinition Width="48*"/>
         </Grid.ColumnDefinitions>
-        <DockPanel Margin="4">
+        <DockPanel Margin="4,4,4,40" Grid.ColumnSpan="2">
             <Menu HorizontalAlignment="Stretch" VerticalAlignment="Top" 
                 Background="White" DockPanel.Dock="Top" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                <MenuItem x:Name="File" Header="File" Margin="0,0,10,0">
+                <MenuItem x:Name="FileMenu" Header="File" Margin="0,0,10,0">
                     <MenuItem x:Name="New" Header="New" Command="ApplicationCommands.New"/>
                     <MenuItem x:Name="Open" Header="Open" Command="ApplicationCommands.Open"/>
                     <MenuItem x:Name="Save" Header="Save" Command="ApplicationCommands.Save"/>
@@ -52,7 +59,7 @@
                     <MenuItem x:Name="Print" Header="Print" Command="ApplicationCommands.Print"/>
                     <MenuItem x:Name="Exit" Header="Exit" InputGestureText="Shift+Esc"/>
                 </MenuItem>
-                <MenuItem x:Name="Edit" Header="Edit" Margin="0,0,10,0">
+                <MenuItem x:Name="EditMenu" Header="Edit" Margin="0,0,10,0">
                     <MenuItem x:Name="Undo" Header="Undo" Command="ApplicationCommands.Undo"/>
                     <MenuItem x:Name="Redo" Header="Redo" Command="ApplicationCommands.Redo"/>
                     <Separator/>
@@ -72,7 +79,7 @@
                     <Separator/>
                     <MenuItem x:Name="TimeDate" Header="Time/Date"/>
                 </MenuItem>
-                <MenuItem x:Name="Customise" Header="Customise" Margin="0,0,10,0">
+                <MenuItem x:Name="CustomiseMenu" Header="Customise" Margin="0,0,10,0">
                     <MenuItem x:Name="DarkTheme" Header="Dark Theme" IsCheckable="True"/>
                     <MenuItem x:Name="Font" Header="Font" Click="Font_Click"/>
                     <MenuItem x:Name="WordWrap" Header="Word Wrap" IsCheckable="True"
@@ -83,11 +90,11 @@
                               Checked="SpellCheck_Checked"
                               Unchecked="SpellCheck_Unchecked"/>
                 </MenuItem>
-                <MenuItem x:Name="Tools" Header="Tools" Margin="0,0,10,0">
+                <MenuItem x:Name="ToolsMenu" Header="Tools" Margin="0,0,10,0">
                     <MenuItem x:Name="TypexMemo" Header="TypeX Memo"/>
                     <MenuItem x:Name="OCR" Header="OCR"/>
                 </MenuItem>
-                <MenuItem x:Name="View" Header="View" Margin="0,0,10,0">
+                <MenuItem x:Name="ViewMenu" Header="View" Margin="0,0,10,0">
                     <MenuItem x:Name="ZoomIn" Header="Zoom In"/>
                     <MenuItem x:Name="ZoomOut" Header="Zoom Out"/>
                     <MenuItem x:Name="RestoreDefaultZoom" Header="Restore Default Zoom"/>
@@ -101,7 +108,7 @@
                 </MenuItem>
             </Menu>
         </DockPanel>
-        <TextBox x:Name="TextBox" Grid.Row="1" Grid.Column="0" 
+        <TextBox x:Name="TextBox" Grid.Column="0" 
                  Text="Drag and drop a file here or start typing" 
                  FontSize="24"
                  FontFamily="{Binding Path=Default.DefaultFont,Mode=TwoWay}"
@@ -110,9 +117,9 @@
                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                  TextWrapping="{Binding Path=Default.WordWrapSet,Mode=TwoWay}" SpellCheck.IsEnabled="{Binding Path=Default.SpellCheckSet,Mode=TwoWay}"
                  HorizontalScrollBarVisibility="Auto"
-                 VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged"/>
+                 VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged" Grid.ColumnSpan="2" Margin="0,26,0,0" Grid.RowSpan="2"/>
         <StatusBar x:Name="StatusBarElement" Grid.Row="2" Grid.Column="0"
-                   Visibility="{Binding Path=Default.StatusBarSet,Converter={StaticResource BoolToVis},Mode=TwoWay}">
+                   Visibility="{Binding Path=Default.StatusBarSet,Converter={StaticResource BoolToVis},Mode=TwoWay}" Grid.ColumnSpan="2">
             <StatusBarItem Margin="6,0,0,0">
                 <TextBlock x:Name="LineLabel" Text="Line : " FontSize="13"/>
             </StatusBarItem>
@@ -129,10 +136,7 @@
                 <TextBlock x:Name="EncodingLabel" Text="UTF-8" FontSize="13"/>
             </StatusBarItem>
             <StatusBarItem Margin="6,0,0,0">
-                <TextBlock x:Name="AutosaveLabel" Text="Saving the text as you are typing..." 
-                           FontSize="13"
-                           Visibility="Hidden"
-                           />
+                <TextBlock x:Name="AutosaveLabel" FontSize="13"/>
             </StatusBarItem>
         </StatusBar>
     </Grid>
