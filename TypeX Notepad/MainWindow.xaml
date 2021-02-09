@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TypeX_Notepad"
         xmlns:prop="clr-namespace:TypeX_Notepad.Properties"
+        xmlns:models="clr-namespace:TypeX_Notepad.Models"
         mc:Ignorable="d"
         Title="TypeX Notepad - Untitled" Height="450" Width="800" Loaded="MainForm_Loaded">
     <Window.CommandBindings>
@@ -24,10 +25,9 @@
                         Executed="Save_Executed"/>
     </Window.CommandBindings>
     <Window.Resources>
-        <prop:Settings x:Key="settings"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
-    <Grid DataContext="{StaticResource settings}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -40,104 +40,129 @@
         <DockPanel Margin="4,4,4,40" Grid.ColumnSpan="2">
             <Menu HorizontalAlignment="Stretch" VerticalAlignment="Top" 
                 Background="White" DockPanel.Dock="Top" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-                <MenuItem x:Name="FileMenu" Header="File" Margin="0,0,10,0">
-                    <MenuItem x:Name="New" Header="New" Command="ApplicationCommands.New"/>
-                    <MenuItem x:Name="Open" Header="Open" Command="ApplicationCommands.Open"/>
-                    <MenuItem x:Name="Save" Header="Save" Command="ApplicationCommands.Save"/>
-                    <MenuItem x:Name="SaveAs" Header="Save As" Command="ApplicationCommands.SaveAs"
+                <Menu.Items>
+                    <MenuItem x:Name="FileMenu" Header="File" Margin="0,0,10,0">
+                        <MenuItem.Items>
+                            <MenuItem x:Name="New" Header="New" Command="ApplicationCommands.New"/>
+                            <MenuItem x:Name="Open" Header="Open" Command="ApplicationCommands.Open"/>
+                            <MenuItem x:Name="Save" Header="Save" Command="ApplicationCommands.Save"/>
+                            <MenuItem x:Name="SaveAs" Header="Save As" Command="ApplicationCommands.SaveAs"
                               InputGestureText="Alt+S"/>
-                    <MenuItem x:Name="AutoSave" Header="AutoSave"
+                            <MenuItem x:Name="AutoSave" Header="AutoSave"
                               IsCheckable="True"
                               InputGestureText="Ctrl+T"
-                              IsChecked="{Binding Default.AutoSaveSet,Mode=TwoWay}"
+                              IsChecked="{Binding Source={x:Static prop:Settings.Default},Path=AutoSaveSet,Mode=TwoWay}"
                               Click="AutoSave_Click"
                               />
-                    <MenuItem x:Name="EncodingOpt" Header="Show Encoding Options"
+                            <MenuItem x:Name="EncodingOpt" Header="Show Encoding Options"
                               IsCheckable="True"/>
-                    <MenuItem x:Name="PageSetup" Header="Page Setup" InputGestureText="Alt+P"/>
-                    <MenuItem x:Name="PrintPreview" Header="Print Preview" Command="ApplicationCommands.PrintPreview"/>
-                    <MenuItem x:Name="Print" Header="Print" Command="ApplicationCommands.Print"/>
-                    <MenuItem x:Name="Exit" Header="Exit" InputGestureText="Shift+Esc"/>
-                </MenuItem>
-                <MenuItem x:Name="EditMenu" Header="Edit" Margin="0,0,10,0">
-                    <MenuItem x:Name="Undo" Header="Undo" Command="ApplicationCommands.Undo"/>
-                    <MenuItem x:Name="Redo" Header="Redo" Command="ApplicationCommands.Redo"/>
-                    <Separator/>
-                    <MenuItem x:Name="Cut" Header="Cut" Command="ApplicationCommands.Cut"/>
-                    <MenuItem x:Name="Copy" Header="Copy" Command="ApplicationCommands.Copy"/>
-                    <MenuItem x:Name="Paste" Header="Paste" Command="ApplicationCommands.Paste"/>
-                    <MenuItem x:Name="ClipBoard" Header="Show Clipboard"/>
-                    <MenuItem x:Name="Delete" Header="Delete" Command="ApplicationCommands.Delete"/>
-                    <Separator/>
-                    <MenuItem x:Name="Find" Header="Find" Command="ApplicationCommands.Find"/>
-                    <MenuItem x:Name="FindNext" Header="Find Next"/>
-                    <MenuItem x:Name="Replace" Header="Replace" Command="ApplicationCommands.Replace"/>
-                    <MenuItem x:Name="GoTo" Header="Go To..."/>
-                    <MenuItem x:Name="SelectAll" Header="Select All" Command="ApplicationCommands.SelectAll"/>
-                    <MenuItem x:Name="SearchWithGoogle" Header="Search With Google"/>
-                    <MenuItem x:Name="SearchWithBing" Header="Search With Bing"/>
-                    <Separator/>
-                    <MenuItem x:Name="TimeDate" Header="Time/Date"/>
-                </MenuItem>
-                <MenuItem x:Name="CustomiseMenu" Header="Customise" Margin="0,0,10,0">
-                    <MenuItem x:Name="DarkTheme" Header="Dark Theme" IsCheckable="True"/>
-                    <MenuItem x:Name="Font" Header="Font" Click="Font_Click"/>
-                    <MenuItem x:Name="WordWrap" Header="Word Wrap" IsCheckable="True"
+                            <MenuItem x:Name="PageSetup" Header="Page Setup" InputGestureText="Alt+P"/>
+                            <MenuItem x:Name="PrintPreview" Header="Print Preview" Command="ApplicationCommands.PrintPreview"/>
+                            <MenuItem x:Name="Print" Header="Print" Command="ApplicationCommands.Print"/>
+                            <MenuItem x:Name="Exit" Header="Exit" InputGestureText="Shift+Esc"/>
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem x:Name="EditMenu" Header="Edit" Margin="0,0,10,0">
+                        <MenuItem.Items>
+                        <MenuItem x:Name="Undo" Header="Undo" Command="ApplicationCommands.Undo"/>
+                        <MenuItem x:Name="Redo" Header="Redo" Command="ApplicationCommands.Redo"/>
+                        <Separator/>
+                        <MenuItem x:Name="Cut" Header="Cut" Command="ApplicationCommands.Cut"/>
+                        <MenuItem x:Name="Copy" Header="Copy" Command="ApplicationCommands.Copy"/>
+                        <MenuItem x:Name="Paste" Header="Paste" Command="ApplicationCommands.Paste"/>
+                        <MenuItem x:Name="ClipBoard" Header="Show Clipboard"/>
+                        <MenuItem x:Name="Delete" Header="Delete" Command="ApplicationCommands.Delete"/>
+                        <Separator/>
+                        <MenuItem x:Name="Find" Header="Find" Command="ApplicationCommands.Find"/>
+                        <MenuItem x:Name="FindNext" Header="Find Next"/>
+                        <MenuItem x:Name="Replace" Header="Replace" Command="ApplicationCommands.Replace"/>
+                        <MenuItem x:Name="GoTo" Header="Go To..."/>
+                        <MenuItem x:Name="SelectAll" Header="Select All" Command="ApplicationCommands.SelectAll"/>
+                        <MenuItem x:Name="SearchWithGoogle" Header="Search With Google"/>
+                        <MenuItem x:Name="SearchWithBing" Header="Search With Bing"/>
+                        <Separator/>
+                        <MenuItem x:Name="TimeDate" Header="Time/Date"/>
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem x:Name="CustomiseMenu" Header="Customise" Margin="0,0,10,0">
+                        <MenuItem.Items>
+                        <MenuItem x:Name="DarkTheme" Header="Dark Theme" IsCheckable="True"/>
+                        <MenuItem x:Name="Font" Header="Font" Click="Font_Click"/>
+                        <MenuItem x:Name="WordWrap" Header="Word Wrap" IsCheckable="True"
                               Checked="WordWrap_Checked"
                               Unchecked="WordWrap_Unchecked"
                               />
-                    <MenuItem x:Name="SpellCheck" Header="SpellCheck" IsCheckable="True" 
+                        <MenuItem x:Name="SpellCheck" Header="SpellCheck" IsCheckable="True" 
                               Checked="SpellCheck_Checked"
                               Unchecked="SpellCheck_Unchecked"/>
-                </MenuItem>
-                <MenuItem x:Name="ToolsMenu" Header="Tools" Margin="0,0,10,0">
-                    <MenuItem x:Name="TypexMemo" Header="TypeX Memo"/>
-                    <MenuItem x:Name="OCR" Header="OCR"/>
-                </MenuItem>
-                <MenuItem x:Name="ViewMenu" Header="View" Margin="0,0,10,0">
-                    <MenuItem x:Name="ZoomIn" Header="Zoom In"/>
-                    <MenuItem x:Name="ZoomOut" Header="Zoom Out"/>
-                    <MenuItem x:Name="RestoreDefaultZoom" Header="Restore Default Zoom"/>
-                    <MenuItem x:Name="StatusBar" Header="Status Bar" IsCheckable="True"
+                            </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem x:Name="ToolsMenu" Header="Tools" Margin="0,0,10,0">
+                        <MenuItem.Items>
+                        <MenuItem x:Name="TypexMemo" Header="TypeX Memo"/>
+                        <MenuItem x:Name="OCR" Header="OCR"/>
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem x:Name="ViewMenu" Header="View" Margin="0,0,10,0">
+                        <MenuItem.Items>
+                            <MenuItem x:Name="ZoomIn" Header="Zoom In"/>
+                            <MenuItem x:Name="ZoomOut" Header="Zoom Out"/>
+                            <MenuItem x:Name="RestoreDefaultZoom" Header="Restore Default Zoom"/>
+                            <MenuItem x:Name="StatusBar" Header="Status Bar" IsCheckable="True"
                               Checked="StatusBar_Checked"
                               Unchecked="StatusBar_Unchecked"/>
-                </MenuItem>
-                <MenuItem x:Name="HelpMenu" Header="Help" Margin="0,0,10,0">
-                    <MenuItem x:Name="HelpItem" Header="Help"/>
-                    <MenuItem x:Name="AboutUs" Header="About TypeX Notepad"/>
-                </MenuItem>
+                        </MenuItem.Items>
+                    </MenuItem>
+                    <MenuItem x:Name="HelpMenu" Header="Help" Margin="0,0,10,0">
+                        <MenuItem.Items>
+                            <MenuItem x:Name="HelpItem" Header="Help"/>
+                            <MenuItem x:Name="AboutUs" Header="About TypeX Notepad"/>
+                        </MenuItem.Items>
+                    </MenuItem>
+                </Menu.Items>
             </Menu>
         </DockPanel>
-        <TextBox x:Name="TextBox" Grid.Column="0" 
+        <TextBox x:Name="TextBox" Grid.Column="0"
                  Text="Drag and drop a file here or start typing" 
                  FontSize="24"
-                 FontFamily="{Binding Path=Default.DefaultFont,Mode=TwoWay}"
+                 FontFamily="{Binding Source={x:Static prop:Settings.Default}, Path=DefaultFont,Mode=TwoWay}"
                  BorderThickness="0"
                  AcceptsReturn="True" AcceptsTab="True" 
                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                 TextWrapping="{Binding Path=Default.WordWrapSet,Mode=TwoWay}" SpellCheck.IsEnabled="{Binding Path=Default.SpellCheckSet,Mode=TwoWay}"
+                 TextWrapping="{Binding Source={x:Static prop:Settings.Default}, Path=WordWrapSet,Mode=TwoWay}" SpellCheck.IsEnabled="{Binding Path=Default.SpellCheckSet,Mode=TwoWay}"
                  HorizontalScrollBarVisibility="Auto"
                  VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged" Grid.ColumnSpan="2" Margin="0,26,0,0" Grid.RowSpan="2"/>
         <StatusBar x:Name="StatusBarElement" Grid.Row="2" Grid.Column="0"
-                   Visibility="{Binding Path=Default.StatusBarSet,Converter={StaticResource BoolToVis},Mode=TwoWay}" Grid.ColumnSpan="2">
-            <StatusBarItem Margin="6,0,0,0">
-                <TextBlock x:Name="LineLabel" Text="Line : " FontSize="13"/>
-            </StatusBarItem>
-            <StatusBarItem Margin="6,0,0,0">
-                <TextBlock x:Name="ColLabel" Text="Col : " FontSize="13"/>
-            </StatusBarItem>
-            <StatusBarItem Margin="6,0,0,0">
-                <TextBlock x:Name="WordsLabel" Text="Words : " FontSize="13"/>
-            </StatusBarItem>
-            <StatusBarItem Margin="6,0,0,0">
-                <TextBlock x:Name="ZoomLabel" Text="100%" FontSize="13"/>
-            </StatusBarItem>
-            <StatusBarItem Margin="6,0,0,0">
-                <TextBlock x:Name="EncodingLabel" Text="UTF-8" FontSize="13"/>
-            </StatusBarItem>
-            <StatusBarItem Margin="6,0,0,0">
-                <TextBlock x:Name="AutosaveLabel" FontSize="13"/>
-            </StatusBarItem>
+                   Visibility="{Binding Source={x:Static prop:Settings.Default}, Path=StatusBarSet,Converter={StaticResource BoolToVis},Mode=TwoWay}" Grid.ColumnSpan="2">
+            <StatusBar.Items>
+                <StatusBarItem Margin="6,0,0,0">
+                    <TextBlock x:Name="LineLabel" Text="Line : " FontSize="13"/>
+                </StatusBarItem>
+                <StatusBarItem Margin="6,0,0,0">
+                    <TextBlock x:Name="ColLabel" Text="Col : " FontSize="13"/>
+                </StatusBarItem>
+                <StatusBarItem Margin="6,0,0,0">
+                    <TextBlock x:Name="WordsLabel" Text="Words : " FontSize="13"/>
+                </StatusBarItem>
+                <StatusBarItem Margin="6,0,0,0">
+                    <TextBlock Text="Encoding:" FontSize="13" x:Name="LabelForEncoding"/>
+                </StatusBarItem>
+                <StatusBarItem Margin="1,0,0,0">
+                    <ComboBox x:Name="EncodingSelector" FontSize="13">
+                        <ComboBox.Items>
+                            <ComboBoxItem Content="UTF-8" Selector.IsSelected="True"/>
+                            <ComboBoxItem Content="UTF-16 LE"/>
+                            <ComboBoxItem Content="UTF-16 BE"/>
+                        </ComboBox.Items>
+                    </ComboBox>
+                </StatusBarItem>
+                <StatusBarItem Margin="6,0,0,0">
+                    <TextBlock x:Name="AutosaveLabel" FontSize="13"/>
+                </StatusBarItem>
+                <StatusBarItem Margin="6,0,16,0" HorizontalAlignment="Right">
+                    <TextBlock x:Name="ZoomLabel" Text="Zoom: 100%" FontSize="13"/>
+                </StatusBarItem>
+            </StatusBar.Items>
         </StatusBar>
     </Grid>
 </Window>

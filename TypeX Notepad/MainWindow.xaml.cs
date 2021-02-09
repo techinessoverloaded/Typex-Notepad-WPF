@@ -1,13 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Documents;
-using System.Windows.Forms;
 using TypeX_Notepad.Properties;
 using System.Windows.Controls;
 using System.Text;
-using System;
-using System.Drawing;
 using System.IO;
+using TypeX_Notepad.Models;
 
 namespace TypeX_Notepad
 {
@@ -17,20 +15,28 @@ namespace TypeX_Notepad
     public partial class MainWindow : Window
     {
         private FlowDocument flowDocument;
-        private System.Windows.Controls.PrintDialog printDialog;
-        private PrintPreviewDialog printPreviewDialog;
-        private PageSetupDialog pageSetupDialog;
-        private FontDialog fontDialog;
-        private OpenFileDialog openFileDialog;
-        private SaveFileDialog saveFileDialog;
+        private DocumentModel CurrentDocument;
         private Encoding encoding;
         private static readonly string DefaultText = "Drag and drop a file here or start typing";
         private static readonly string DefaultTitle = "TypeX Notepad - Untitled"; 
         private static readonly string AutoSaveMessage = "Saving the file as you are typing...";
-        private string FilePath = null;
+        private FormControlUtils FormControlUtils;
         public MainWindow()
         {
             InitializeComponent();
+            CurrentDocument = new DocumentModel();
+            FormControlUtils = new FormControlUtils(ref CurrentDocument);
+        }
+        public MainWindow(DocumentModel document)
+        {
+            InitializeComponent();
+            CurrentDocument = document;
+            FormControlUtils = new FormControlUtils(ref CurrentDocument);
+            TextBox.Text = CurrentDocument.Content;
+            TextBox.Text = CurrentDocument.Content;
+            EncodingSelector.SelectedItem = EncodingSelector.Items.GetItemAt(EncodingToInt(CurrentDocument.Encoding));
+            SetTitle(0);
+            UpdateStatusBar();
         }
         private void New_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -38,7 +44,14 @@ namespace TypeX_Notepad
         }
         private void New_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-
+            if (!CurrentDocument.IsSaved&&!CurrentDocument.Content.Equals(DefaultText))
+            {
+                if (MessageBox.Show("Do you want to save the Untitled file before opening a New File ?", "TypeX Notepad - Save Untitled File", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    SaveFileThroughDialog();
+                }
+            }
+            NewFile();
         }
         private void Open_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -46,7 +59,14 @@ namespace TypeX_Notepad
         }
         private void Open_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            if(!CurrentDocument.IsSaved)
+            {
+                if(MessageBox.Show("Do you want to save the Untitled file before opening another File ?", "TypeX Notepad - Save Untitled File",MessageBoxButton.YesNo)==MessageBoxResult.Yes)
+                {
+                    SaveFileThroughDialog();
+                }
+            }
+            OpenFileThroughDialog();
         }
         private void Undo_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -77,9 +97,8 @@ namespace TypeX_Notepad
             InstantiateControls();
             TextBox.TextChanged += new TextChangedEventHandler(TextBox_TextChanged);
             TextBox.KeyUp += new System.Windows.Input.KeyEventHandler(TextBox_KeyUp);
+            EncodingSelector.SelectionChanged += new SelectionChangedEventHandler(Encoding_SelectionChanged);
             UpdateStatusBar();
-            SetTitle();
-            TextBox.Text = DefaultText;
             TextBox.Focus();
             TextBox.SelectAll();
             //flowDocument = new FlowDocument();
@@ -101,36 +120,31 @@ namespace TypeX_Notepad
         }
 
         private void InstantiateControls()
-        { 
+        {
             SpellCheck.IsChecked = Settings.SpellCheckSet;
             WordWrap.IsChecked = TextWrappingToBool(Settings.WordWrapSet);
             StatusBar.IsChecked = Settings.StatusBarSet;
             SetUpCustomCommands();
-            openFileDialog = new OpenFileDialog();
-            saveFileDialog = new SaveFileDialog();
-            fontDialog = new FontDialog();
-            fontDialog.ShowEffects = false;
-            fontDialog.ShowColor = false;
             TextBox.FontFamily = Settings.DefaultFont;
         }
         private void SetUpCustomCommands()
         {
-            RoutedUICommand AutoSaveCmd = new RoutedUICommand("Used for AutoSave", "AutoSaveCommand", typeof(MainMenu),
+            RoutedUICommand AutoSaveCmd = new RoutedUICommand("Used for AutoSave", "AutoSaveCommand", typeof(MainWindow),
                new InputGestureCollection()
                 {
                     new KeyGesture(Key.T,ModifierKeys.Control)
                 });
-            RoutedUICommand SaveAsCmd = new RoutedUICommand("Used for SaveAs", "SaveAsCommand", typeof(MainMenu),
+            RoutedUICommand SaveAsCmd = new RoutedUICommand("Used for SaveAs", "SaveAsCommand", typeof(MainWindow),
                new InputGestureCollection()
                 {
                     new KeyGesture(Key.S,ModifierKeys.Alt)
                 });
-            RoutedUICommand PageSetupCmd = new RoutedUICommand("Used for Page Setup", "PageSetupCommand", typeof(MainMenu),
+            RoutedUICommand PageSetupCmd = new RoutedUICommand("Used for Page Setup", "PageSetupCommand", typeof(MainWindow),
                new InputGestureCollection()
                 {
                     new KeyGesture(Key.P,ModifierKeys.Alt)
                 });
-            RoutedUICommand ExitCmd = new RoutedUICommand("Used for Exit", "ExitCommand", typeof(MainMenu),
+            RoutedUICommand ExitCmd = new RoutedUICommand("Used for Exit", "ExitCommand", typeof(MainWindow),
                new InputGestureCollection()
                 {
                     new KeyGesture(Key.Escape,ModifierKeys.Shift)
@@ -160,8 +174,11 @@ namespace TypeX_Notepad
         }
         private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            FilePath = "E:\\sample.txt";
-            SetTitle();
+            if (CurrentDocument.IsInvalidFile)
+                SaveFileThroughDialog();
+            else
+                File.WriteAllText(CurrentDocument.FilePath, CurrentDocument.Content, CurrentDocument.Encoding);
+            SetTitle(0);
         }
         private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -169,8 +186,8 @@ namespace TypeX_Notepad
         }
         private void SaveAs_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            FilePath = null;
-            SetTitle();
+            SaveFileThroughDialog();
+            SetTitle(0);
         }
         private void SaveAs_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -194,16 +211,6 @@ namespace TypeX_Notepad
         }
         private void Font_Click(object sender, RoutedEventArgs e)
         {
-            fontDialog.Font = new Font(new System.Drawing.FontFamily(Settings.DefaultFont.Source), 23);
-            if (fontDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                System.Windows.Media.FontFamily fontFamily = new System.Windows.Media.FontFamily(fontDialog.Font.Name);
-                if (!fontFamily.Equals(Settings.DefaultFont))
-                {
-                    Settings.DefaultFont = fontFamily;
-                    Settings.Save();
-                }
-            }
             
         }
         private static Settings Settings { get { return Settings.Default; } }
@@ -212,7 +219,7 @@ namespace TypeX_Notepad
             int row = TextBox.GetLineIndexFromCharacterIndex(TextBox.CaretIndex);
             int col = TextBox.GetLineLength(row);
             int words = GetWordCount();
-            if(LineLabel!=null)
+            if (LineLabel != null)
                 LineLabel.Text = "Line : " + (row + 1);
             if(ColLabel!=null)
                 ColLabel.Text = "Col : " + (col + 1);
@@ -220,16 +227,58 @@ namespace TypeX_Notepad
                 WordsLabel.Text = "Words : " + words;
             if (AutosaveLabel != null)
             {
-                if (Settings.AutoSaveSet&&FilePath!=null)
+                if (Settings.AutoSaveSet&& CurrentDocument.FilePath !=null)
                 { 
-                    File.WriteAllText(FilePath, TextBox.Text);
+                    File.WriteAllText(CurrentDocument.FilePath, TextBox.Text);
                     AutosaveLabel.Text = AutoSaveMessage;
                 }
                 else
                 {
                     AutosaveLabel.Text = string.Empty;
                 }
+            }   
+        }
+        private void Encoding_SelectionChanged(object sender,SelectionChangedEventArgs e)
+        {
+            Encoding old = CurrentDocument.Encoding;
+            CurrentDocument.Encoding = TextToEncoding(((sender as System.Windows.Controls.ComboBox).SelectedItem as ComboBoxItem).Content.ToString());
+            if(old!=CurrentDocument.Encoding)
+            {
+                if(!Settings.AutoSaveSet)
+                    SetTitle(1);
+                else
+                    File.WriteAllText(CurrentDocument.FilePath, CurrentDocument.Content, CurrentDocument.Encoding);
             }
+        }
+        private string EncodingToText(Encoding encoding)
+        {
+            if (encoding.Equals(Encoding.UTF8))
+                return "UTF-8";
+            if (encoding.Equals(Encoding.Unicode))
+                return "UTF-16 LE";
+            if (encoding.Equals(Encoding.BigEndianUnicode))
+                return "UTF-16 BE";
+            return string.Empty;
+        }
+        private Encoding TextToEncoding(string text)
+        {
+            if (text.Equals("UTF-8"))
+                return Encoding.UTF8;
+            if (text.Equals("UTF-16 LE"))
+                return Encoding.Unicode;
+            if (text.Equals("UTF-16 BE"))
+                return Encoding.BigEndianUnicode;
+            return Encoding.UTF8;
+        }
+        private int EncodingToInt(Encoding encoding)
+        {
+            if (encoding.Equals(Encoding.UTF8))
+                return 0;
+            if (encoding.Equals(Encoding.Unicode))
+                return 1;
+            if (encoding.Equals(Encoding.BigEndianUnicode))
+                return 2;
+            return -1;
         }
         private int GetWordCount()
         {
@@ -252,9 +301,26 @@ namespace TypeX_Notepad
             }
             return count;
         }
-        private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void TextBox_TextChanged(object sender,TextChangedEventArgs e)
         {
-            UpdateStatusBar();
+            if (CurrentDocument != null)
+            {
+                CurrentDocument.Content = TextBox.Text;
+                if (!Settings.AutoSaveSet)
+                {
+                    SetTitle(1);
+                    CurrentDocument.IsSaved = false;
+                }
+                else 
+                {
+                    if(!CurrentDocument.IsInvalidFile)
+                    {
+                        File.WriteAllText(CurrentDocument.FilePath, CurrentDocument.Content, CurrentDocument.Encoding);
+                        CurrentDocument.IsSaved = true;
+                    }
+                }
+                UpdateStatusBar();
+            }
         }
         private void SpellCheck_Checked(object sender, RoutedEventArgs e)
         {
@@ -298,7 +364,7 @@ namespace TypeX_Notepad
         {
             Settings.AutoSaveSet = !Settings.AutoSaveSet;
             Settings.Save();
-            SetTitle();
+            SetTitle(0);
         }
         private void AutoSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -308,23 +374,68 @@ namespace TypeX_Notepad
         {
             ToggleAutoSave();
         }
-        private void SetTitle()
+        private void SetTitle(int mode)
         {
-            if(FilePath!=null)
+            Title = GetTitle(mode);
+        }
+        private string GetTitle(int mode)
+        {
+            switch(mode)
             {
-                if(Settings.AutoSaveSet)
-                {
-                    Title = DefaultTitle.Replace("Untitled", FilePath + " (AutoSave Enabled)");
-                }
-                else
-                {
-                    Title = DefaultTitle.Replace("Untitled", FilePath);
-                }
+                case 0:
+                    if (!CurrentDocument.IsInvalidFile)
+                    {
+                        if (Settings.AutoSaveSet)
+                        {
+                            return DefaultTitle.Replace("Untitled", CurrentDocument.FilePath + " (AutoSave Enabled)");
+                        }
+                        else
+                        {
+                            return DefaultTitle.Replace("Untitled", CurrentDocument.FilePath);
+                        }
+                    }
+                    else
+                    {
+                        return DefaultTitle;
+                    }
+                case 1:
+                    if (!CurrentDocument.IsInvalidFile)
+                    {
+                        return DefaultTitle.Replace("Untitled",CurrentDocument.FilePath+"*");
+                    }
+                    else
+                    {
+                        return DefaultTitle.Replace("Untitled","Untitled*");
+                    }
+                default:
+                    return string.Empty;
             }
-            else
+        }
+        private void NewFile()
+        {
+            CurrentDocument.Content = DefaultText;
+            CurrentDocument.Encoding = Encoding.UTF8;
+            CurrentDocument.Extension = ".txt";
+            CurrentDocument.FilePath = null;
+            CurrentDocument.FileName = null;
+            CurrentDocument.IsSaved = false;
+            SetTitle(0);
+            UpdateStatusBar();
+        }
+        private void OpenFileThroughDialog()
+        {
+            if (FormControlUtils.ShowOpenFileDialog())
             {
-                Title = DefaultTitle;
+                TextBox.Text = CurrentDocument.Content;
+                EncodingSelector.SelectedItem = EncodingSelector.Items.GetItemAt(EncodingToInt(CurrentDocument.Encoding));
+                SetTitle(0);
+                UpdateStatusBar();
             }
+        }
+        private void SaveFileThroughDialog()
+        {
+            if(FormControlUtils.ShowSaveFileDialog())
+                SetTitle(0);
         }
     }
 }
