@@ -20,9 +20,9 @@ namespace TypeX_Notepad
             {
                 for (int i = 0; i < e.Args.Length; ++i)
                 {
+                    DocumentModel document = new DocumentModel();
                     try
                     {
-                        DocumentModel document = new DocumentModel();
                         document.FilePath = e.Args[i];
                         StreamReader reader = new StreamReader(document.FilePath, true);
                         document.Content = reader.ReadToEnd();
