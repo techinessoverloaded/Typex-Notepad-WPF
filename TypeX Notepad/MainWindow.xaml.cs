@@ -437,5 +437,10 @@ namespace TypeX_Notepad
             if(FormControlUtils.ShowSaveFileDialog())
                 SetTitle(0);
         }
+
+        private void TextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            TextBox.SelectAll();
+        }
     }
 }

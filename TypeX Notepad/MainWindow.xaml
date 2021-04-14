@@ -129,9 +129,10 @@
                  BorderThickness="0"
                  AcceptsReturn="True" AcceptsTab="True" 
                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                 TextWrapping="{Binding Source={x:Static prop:Settings.Default}, Path=WordWrapSet,Mode=TwoWay}" SpellCheck.IsEnabled="{Binding Path=Default.SpellCheckSet,Mode=TwoWay}"
+                 TextWrapping="{Binding Source={x:Static prop:Settings.Default}, Path=WordWrapSet,Mode=TwoWay}" 
+                 SpellCheck.IsEnabled="{Binding Source={x:Static prop:Settings.Default},Path=SpellCheckSet,Mode=TwoWay}"
                  HorizontalScrollBarVisibility="Auto"
-                 VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged" Grid.ColumnSpan="2" Margin="0,26,0,0" Grid.RowSpan="2"/>
+                 VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged" Grid.ColumnSpan="2" Margin="0,26,0,0" Grid.RowSpan="2" MouseDoubleClick="TextBox_MouseDoubleClick"/>
         <StatusBar x:Name="StatusBarElement" Grid.Row="2" Grid.Column="0"
                    Visibility="{Binding Source={x:Static prop:Settings.Default}, Path=StatusBarSet,Converter={StaticResource BoolToVis},Mode=TwoWay}" Grid.ColumnSpan="2">
             <StatusBar.Items>
