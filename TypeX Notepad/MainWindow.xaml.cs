@@ -21,6 +21,7 @@ namespace TypeX_Notepad
         private static readonly string DefaultTitle = "TypeX Notepad - Untitled"; 
         private static readonly string AutoSaveMessage = "Saving the file as you are typing...";
         private FormControlUtils FormControlUtils;
+        private int BegSelCounter = 1, StartIndex = 0, EndIndex = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -101,6 +102,19 @@ namespace TypeX_Notepad
             UpdateStatusBar();
             TextBox.Focus();
             TextBox.SelectAll();
+            if (Settings.AutoSaveSet && CurrentDocument.IsInvalidFile)
+            {
+                if (MessageBox.Show("AutoSave has been enabled, but the file has not been saved even once ! Do you want to save this file now ? If you Select No, then AutoSave will be disabled !",
+                    "TypeX Notepad", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    SaveFileThroughDialog();
+                    SetTitle(0);
+                }
+                else
+                {
+                    ToggleAutoSave();
+                }
+            }
             //flowDocument = new FlowDocument();
             //printDialog = new System.Windows.Controls.PrintDialog();
             //printPreviewDialog = new PrintPreviewDialog();
@@ -149,6 +163,17 @@ namespace TypeX_Notepad
                 {
                     new KeyGesture(Key.Escape,ModifierKeys.Shift)
                 });
+            RoutedUICommand BegEndSelCmd = new RoutedUICommand("Used for Begin/End Selection", "BegEndSelCommand", typeof(MainWindow),
+                new InputGestureCollection()
+                {
+                    new KeyGesture(Key.A,ModifierKeys.Control|ModifierKeys.Alt)
+                });
+            RoutedUICommand SelectAllCmd = new RoutedUICommand("Used for Select All", "SelectAllCommand", typeof(MainWindow),
+                new InputGestureCollection()
+                {
+                    new KeyGesture(Key.A,ModifierKeys.Control)
+                }
+                );
             CommandBindings.Add(new CommandBinding(AutoSaveCmd,new ExecutedRoutedEventHandler(AutoSave_Executed),
                 new CanExecuteRoutedEventHandler(AutoSave_CanExecute)));
             CommandBindings.Add(new CommandBinding(SaveAsCmd,new ExecutedRoutedEventHandler(SaveAs_Executed),
@@ -157,10 +182,16 @@ namespace TypeX_Notepad
                 new CanExecuteRoutedEventHandler(PageSetup_CanExecute)));
             CommandBindings.Add(new CommandBinding(ExitCmd, new ExecutedRoutedEventHandler(Exit_Executed),
                 new CanExecuteRoutedEventHandler(Exit_CanExecute)));
+            CommandBindings.Add(new CommandBinding(BegEndSelCmd, new ExecutedRoutedEventHandler(BegEndSel_Executed),
+                new CanExecuteRoutedEventHandler(BegEndSel_CanExecute)));
+            CommandBindings.Add(new CommandBinding(SelectAllCmd, new ExecutedRoutedEventHandler(SelectAll_Executed),
+                new CanExecuteRoutedEventHandler(SelectAll_CanExecute)));
             AutoSave.Command = AutoSaveCmd;
             SaveAs.Command = SaveAsCmd;
             PageSetup.Command = PageSetupCmd;
             Exit.Command = ExitCmd;
+            BeginEndSel.Command = BegEndSelCmd;
+            SelectAll.Command = SelectAllCmd;
         }
 
         private void PageSetup_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -170,14 +201,14 @@ namespace TypeX_Notepad
 
         private void PageSetup_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            System.Windows.MessageBox.Show("Page Setup");
+            MessageBox.Show("Page Setup");
         }
         private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             if (CurrentDocument.IsInvalidFile)
                 SaveFileThroughDialog();
             else
-                File.WriteAllText(CurrentDocument.FilePath, CurrentDocument.Content, CurrentDocument.Encoding);
+                SaveFileUtil();
             SetTitle(0);
         }
         private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -209,6 +240,41 @@ namespace TypeX_Notepad
         {
             e.CanExecute = true;
         }
+        private void BegEndSel_CanExecute(object sender,CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = string.IsNullOrEmpty(TextBox.Text) ? false : true;
+        }
+        private void BegEndSel_Executed(object sender,ExecutedRoutedEventArgs e)
+        {
+            if(BegSelCounter==1)
+            {
+                StartIndex = TextBox.CaretIndex;
+                BegSelCounter = 2;
+            }
+            else
+            {
+                EndIndex = TextBox.CaretIndex;
+                if (StartIndex < EndIndex)
+                {
+                    TextBox.SelectionStart = StartIndex;
+                    TextBox.SelectionLength = EndIndex - StartIndex + 1;
+                }
+                else
+                {
+                    TextBox.SelectionStart = EndIndex;
+                    TextBox.SelectionLength = StartIndex - EndIndex + 1;
+                }
+                BegSelCounter = 1;
+            }
+        }
+        private void SelectAll_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = string.IsNullOrEmpty(TextBox.Text) ? false : true;
+        }
+        private void SelectAll_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            TextBox.SelectAll();
+        }
         private void Font_Click(object sender, RoutedEventArgs e)
         {
             
@@ -228,8 +294,8 @@ namespace TypeX_Notepad
             if (AutosaveLabel != null)
             {
                 if (Settings.AutoSaveSet&& CurrentDocument.FilePath !=null)
-                { 
-                    File.WriteAllText(CurrentDocument.FilePath, TextBox.Text);
+                {
+                    File.WriteAllText(CurrentDocument.FilePath, CurrentDocument.Content, CurrentDocument.Encoding);
                     AutosaveLabel.Text = AutoSaveMessage;
                 }
                 else
@@ -241,13 +307,16 @@ namespace TypeX_Notepad
         private void Encoding_SelectionChanged(object sender,SelectionChangedEventArgs e)
         {
             Encoding old = CurrentDocument.Encoding;
-            CurrentDocument.Encoding = TextToEncoding(((sender as System.Windows.Controls.ComboBox).SelectedItem as ComboBoxItem).Content.ToString());
+            CurrentDocument.Encoding = TextToEncoding(((sender as ComboBox).SelectedItem as ComboBoxItem).Content.ToString());
             if(old!=CurrentDocument.Encoding)
             {
-                if(!Settings.AutoSaveSet)
+                if (!Settings.AutoSaveSet)
                     SetTitle(1);
                 else
+                {
+                    if(!CurrentDocument.IsInvalidFile)
                     File.WriteAllText(CurrentDocument.FilePath, CurrentDocument.Content, CurrentDocument.Encoding);
+                }
             }
         }
         private string EncodingToText(Encoding encoding)
@@ -368,7 +437,20 @@ namespace TypeX_Notepad
         }
         private void AutoSave_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            ToggleAutoSave();
+            if (!Settings.AutoSaveSet && CurrentDocument.IsInvalidFile)
+            {
+                if (MessageBox.Show("You have chosen to enable AutoSave, but the file has not been saved even once ! Do you want to save this file now ? If you Select No, then AutoSave will be disabled !",
+                    "TypeX Notepad", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    SaveFileThroughDialog();
+                    ToggleAutoSave();
+                }
+            }
+            else
+            {
+                ToggleAutoSave();
+            }
+
         }
         private void AutoSave_Click(object sender,RoutedEventArgs e)
         {
@@ -421,6 +503,19 @@ namespace TypeX_Notepad
             CurrentDocument.IsSaved = false;
             SetTitle(0);
             UpdateStatusBar();
+            if (Settings.AutoSaveSet && CurrentDocument.IsInvalidFile)
+            {
+                if (MessageBox.Show("AutoSave has been enabled, but the New file has not been saved even once ! Do you want to save this New file now ? If you Select No, then AutoSave will be disabled !",
+                    "TypeX Notepad", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    SaveFileThroughDialog();
+                    SetTitle(0);
+                }
+                else
+                {
+                    ToggleAutoSave();
+                }
+            }
         }
         private void OpenFileThroughDialog()
         {
@@ -437,10 +532,23 @@ namespace TypeX_Notepad
             if(FormControlUtils.ShowSaveFileDialog())
                 SetTitle(0);
         }
-
-        private void TextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void TextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            TextBox.SelectAll();
+            if(e.ClickCount==2)
+            {
+                int CharIndex = TextBox.CaretIndex;
+                int LineIndex = TextBox.GetLineIndexFromCharacterIndex(CharIndex);
+                int Length = TextBox.GetLineLength(LineIndex);
+                TextBox.Select(CharIndex, Length);
+            }
+            if(e.ClickCount==3)
+            {
+                TextBox.SelectAll();
+            }
+        }
+        private void SaveFileUtil()
+        {
+            File.WriteAllText(CurrentDocument.FilePath, CurrentDocument.Content, CurrentDocument.Encoding);
         }
     }
 }

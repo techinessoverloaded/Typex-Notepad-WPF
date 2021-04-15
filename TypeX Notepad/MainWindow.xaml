@@ -77,7 +77,10 @@
                         <MenuItem x:Name="FindNext" Header="Find Next"/>
                         <MenuItem x:Name="Replace" Header="Replace" Command="ApplicationCommands.Replace"/>
                         <MenuItem x:Name="GoTo" Header="Go To..."/>
-                        <MenuItem x:Name="SelectAll" Header="Select All" Command="ApplicationCommands.SelectAll"/>
+                        <MenuItem x:Name="SelectAll" Header="Select All"/>
+                        <MenuItem x:Name="BeginEndSel" Header="Begin/End Selection" 
+                        InputGestureText="Ctrl+Alt+A"
+                        />
                         <MenuItem x:Name="SearchWithGoogle" Header="Search With Google"/>
                         <MenuItem x:Name="SearchWithBing" Header="Search With Bing"/>
                         <Separator/>
@@ -101,6 +104,7 @@
                         <MenuItem.Items>
                         <MenuItem x:Name="TypexMemo" Header="TypeX Memo"/>
                         <MenuItem x:Name="OCR" Header="OCR"/>
+                        <MenuItem x:Name="ReadOnly" Header="Read-Only Mode"/>
                         </MenuItem.Items>
                     </MenuItem>
                     <MenuItem x:Name="ViewMenu" Header="View" Margin="0,0,10,0">
@@ -132,7 +136,9 @@
                  TextWrapping="{Binding Source={x:Static prop:Settings.Default}, Path=WordWrapSet,Mode=TwoWay}" 
                  SpellCheck.IsEnabled="{Binding Source={x:Static prop:Settings.Default},Path=SpellCheckSet,Mode=TwoWay}"
                  HorizontalScrollBarVisibility="Auto"
-                 VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged" Grid.ColumnSpan="2" Margin="0,26,0,0" Grid.RowSpan="2" MouseDoubleClick="TextBox_MouseDoubleClick"/>
+                 VerticalScrollBarVisibility="Visible" TextChanged="TextBox_TextChanged" Grid.ColumnSpan="2" Margin="0,26,0,0" Grid.RowSpan="2" 
+                 PreviewMouseDown="TextBox_PreviewMouseDown"
+                 />
         <StatusBar x:Name="StatusBarElement" Grid.Row="2" Grid.Column="0"
                    Visibility="{Binding Source={x:Static prop:Settings.Default}, Path=StatusBarSet,Converter={StaticResource BoolToVis},Mode=TwoWay}" Grid.ColumnSpan="2">
             <StatusBar.Items>
