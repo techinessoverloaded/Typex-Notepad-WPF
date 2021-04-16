@@ -532,6 +532,18 @@ namespace TypeX_Notepad
             if(FormControlUtils.ShowSaveFileDialog())
                 SetTitle(0);
         }
+
+        private void MainWindowForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if(!CurrentDocument.IsSaved)
+            {
+                if(MessageBox.Show("Do you want to save the file before closing TypeX Notepad ?","TypeX Notepad",MessageBoxButton.YesNo,MessageBoxImage.Warning)==MessageBoxResult.Yes)
+                {
+                    FormControlUtils.ShowSaveFileDialog();
+                }
+            }
+        }
+
         private void TextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if(e.ClickCount==2)

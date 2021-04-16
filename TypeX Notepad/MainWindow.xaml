@@ -7,7 +7,9 @@
         xmlns:prop="clr-namespace:TypeX_Notepad.Properties"
         xmlns:models="clr-namespace:TypeX_Notepad.Models"
         mc:Ignorable="d"
-        Title="TypeX Notepad - Untitled" Height="450" Width="800" Loaded="MainForm_Loaded">
+        Title="TypeX Notepad - Untitled" Height="450" Width="800" 
+        Loaded="MainForm_Loaded"
+        Closing="MainWindowForm_Closing">
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.New" CanExecute="New_CanExecute" 
                         Executed="New_Executed"/>

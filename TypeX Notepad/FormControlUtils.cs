@@ -49,7 +49,7 @@ namespace TypeX_Notepad
                 Document.Extension = Path.GetExtension(Document.FilePath);
                 File.WriteAllText(Document.FilePath,Document.Content,Document.Encoding);
                 Document.IsSaved = true;
-                return true;
+                return Document.IsInvalidFile==false;
             }
             return false;
         }
